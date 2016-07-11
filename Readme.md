@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/2gis/2gis-schedule.svg?branch=master)](https://travis-ci.org/2gis/2gis-schedule)
+
 #About
 
 It is library for simple work with 2gis schedule. You can get information is organisation work now? When it will open?
