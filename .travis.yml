@@ -5,3 +5,4 @@ node_js:
   - "6"
   - "6"
   - "node"
+after_success: cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
