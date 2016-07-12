@@ -3,6 +3,9 @@ var CONSTANTS = require('./constants');
 var DAY_KEYS = CONSTANTS.DAY_KEYS;
 var MIDNIGHT = '00:00';
 
+const BREAK_LUNCH = CONSTANTS.BREAK_LUNCH;
+const BREAK_REST = CONSTANTS.BREAK_REST;
+
 /**
  * Returns key for next day with offset from current day
  * Возвращает ключ дня через offset дней после сегодняшнего
@@ -84,3 +87,41 @@ function isEveryDay(schedule) {
     });
 }
 exports.isEveryDay = isEveryDay;
+
+/**
+ * Returns array of breaks between work time intervals
+ * If work time is: [{ from: '08:00', to: '13:00' }, { from: '14:00', to: '17:45' }, { from: '18:00', to: '20:00' }]
+ * Breaks will be [{ from: '13:00', to: '14:00' }, { from: '17:45', to: '18:00' }]
+ * @param  {Object} working_hours
+ * @return {Array}
+ */
+function getBreakHours(working_hours) {
+    return _.reduce(working_hours, function(breaks, interval) {
+        const last = _.last(breaks);
+        // beginning (from) of each new work time interval is the end of break,
+        // we add to the last break this beginning (to)
+        if (last) {
+            last.to = interval.from;
+        }
+        // end (to) of each work time interval is the beginning (from) of the next break,
+        // we add new brake to array
+        return breaks.concat({from: interval.to});
+    }, []).slice(0, -1); // removing last (not closed) break
+}
+exports.getBreakHours = getBreakHours;
+
+/**
+ * Returns type of break. Break for lunch, or other break
+ * 13:00–14:00 --> lunch
+ * 17:00—17:45 --> break
+ * @param  {Object} interval
+ * @param  {String} interval.from - break beginning
+ * @param  {String} interval.to - break end
+ * @return {String}
+ */
+function getBreakType(interval) {
+    const to = interval.to != MIDNIGHT ? interval.to : add24h(interval.to); // 00:00 --> 24:00
+
+    return interval.from >= '12:00' && to <= '16:00' ? BREAK_LUNCH : BREAK_REST;
+}
+exports.getBreakType = getBreakType;

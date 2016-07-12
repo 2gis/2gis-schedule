@@ -85,3 +85,14 @@ function getTodayWorktime(schedule, now) {
     };
 }
 exports.getTodayWorktime = getTodayWorktime;
+
+/**
+ * Returns array of breaks for today
+ * @param  {Object} schedule
+ * @param  {Object} now
+ * @return {Array}
+ */
+function getTodayBreakHours(schedule, now) {
+    return utils.getBreakHours(_.get(schedule[now.day], 'working_hours'));
+}
+exports.getTodayBreakHours = getTodayBreakHours;
