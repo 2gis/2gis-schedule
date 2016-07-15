@@ -121,3 +121,46 @@ Breaks will be `[{ from: '13:00', to: '14:00' }, { from: '17:45', to: '18:00' }]
 
 #### Returns
 `Array` - array of organisation breaks for today
+
+# getStatus
+
+State of the schedule with forecast like this:
+"Will open tomorrow at 10:00" / "Will open on Monday at 8:00" but in object with constants instead of text
+
+#### Arguments
+* `schedule` - 2gis schedule object
+* `now` - now time moment
+* `forecastThreshold` - how max minutes should left when we should say about next event (open / close)
+* `weekends` - days that usually is day off `['Sat', 'Sun']`
+
+
+#### Returns
+`Object` - Information about schedule
+
+```javascript
+{
+    type: 'Current status.',
+    minutesTo: 'Minutes before next event. Opening or closing.',
+    time: 'Time when next event will happened',
+    day: 'Day name in what next event will happen if it's not today,
+    breakType: 'Type of brake. Lunch or other brake.'
+}
+```
+
+##### Status list (constants in `/src/constants`):
+* `OPENED` - firm opened, will not close in near time.
+* `WILL_CLOSE_IN_MINUTE_FOR_BREAK` - will close in 1 minute for break `breakType`.
+* `WILL_CLOSE_IN_TIME_FOR_BREAK` - will close in next `minutesTo` for break `breakType`.
+* `WILL_CLOSE_IN_TIME` - will close in next `minutesTo`
+
+* `WILL_OPEN_AT_TIME` - will open today at `time`
+* `WILL_OPEN_TOMORROW_AT_TIME` - will open tomorrow at `time`
+* `WILL_OPEN_DAY_AFTER_TOMORROW_AT_TIME` - will open the day after tomorrow at `time`
+* `WILL_OPEN_AT_DAY_AT_TIME` - will open on `day` at `time`
+
+* `WILL_OPEN_IN_MINUTE` - will open in 1 minute
+* `WILL_OPEN_IN_TIME` - will open in next `minutesTo`
+
+* `WILL_OPEN_IN_MINUTE_FROM_BREAK` - will open in 1 minute from brake `breakType`
+* `WILL_OPEN_IN_TIME_FROM_BREAK` - will open in `minutesTo` from brake `breakType`
+* `WILL_OPEN_AT_TIME_FROM_BREAK` - will open at `time` from brake `breakType`

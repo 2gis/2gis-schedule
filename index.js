@@ -8,3 +8,5 @@ exports.isEveryDay = utils.isEveryDay;
 exports.getTodayWorktime = core.getTodayWorktime;
 
 exports.getBreakHours = core.getBreakHours;
+
+exports.getStatus = core.getStatus;

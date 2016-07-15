@@ -9,6 +9,31 @@ var WORK_EVERYDAY = CONSTANTS.WORK_EVERYDAY;
 var WORK_24x7 = CONSTANTS.WORK_24x7;
 var WORK_NOT_WORKING = CONSTANTS.WORK_NOT_WORKING;
 
+var EVENT_OPEN = CONSTANTS.EVENT_OPEN;
+var EVENT_CLOSE = CONSTANTS.EVENT_CLOSE;
+
+var BREAK_LUNCH = CONSTANTS.BREAK_LUNCH;
+var BREAK_REST = CONSTANTS.BREAK_REST;
+
+var STATUS_OPENED = CONSTANTS.STATUS_OPENED;
+var STATUS_WILL_CLOSE_IN_MINUTE_FOR_BREAK = CONSTANTS.STATUS_WILL_CLOSE_IN_MINUTE_FOR_BREAK;
+var STATUS_WILL_CLOSE_IN_MINUTE = CONSTANTS.STATUS_WILL_CLOSE_IN_MINUTE;
+var STATUS_WILL_CLOSE_IN_TIME_FOR_BREAK = CONSTANTS.STATUS_WILL_CLOSE_IN_TIME_FOR_BREAK;
+var STATUS_WILL_CLOSE_IN_TIME = CONSTANTS.STATUS_WILL_CLOSE_IN_TIME;
+
+var STATUS_WILL_OPEN_AT_TIME = CONSTANTS.STATUS_WILL_OPEN_AT_TIME;
+var STATUS_WILL_OPEN_AT_DAY_AT_TIME = CONSTANTS.STATUS_WILL_OPEN_AT_DAY_AT_TIME;
+var STATUS_WILL_OPEN_TOMORROW_AT_TIME = CONSTANTS.STATUS_WILL_OPEN_TOMORROW_AT_TIME;
+var STATUS_WILL_OPEN_DAY_AFTER_TOMORROW_AT_TIME = CONSTANTS.STATUS_WILL_OPEN_DAY_AFTER_TOMORROW_AT_TIME;
+
+var STATUS_WILL_OPEN_IN_MINUTE = CONSTANTS.STATUS_WILL_OPEN_IN_MINUTE;
+var STATUS_WILL_OPEN_IN_TIME = CONSTANTS.STATUS_WILL_OPEN_IN_TIME;
+
+var STATUS_WILL_OPEN_IN_MINUTE_FROM_BREAK = CONSTANTS.STATUS_WILL_OPEN_IN_MINUTE_FROM_BREAK;
+var STATUS_WILL_OPEN_IN_TIME_FROM_BREAK = CONSTANTS.STATUS_WILL_OPEN_IN_TIME_FROM_BREAK;
+var STATUS_WILL_OPEN_AT_TIME_FROM_BREAK = CONSTANTS.STATUS_WILL_OPEN_AT_TIME_FROM_BREAK;
+
+
 
 describe('core', function() {
     describe('is24x7', function() {
@@ -155,4 +180,176 @@ describe('core', function() {
         });
     });
 
+
+    describe('getNextEvent', function() {
+        it('Lot of work time intervals', function() {
+            var schedule = {
+                Sun: {
+                    working_hours: [
+                        { from: '06:00', to: '07:00' },
+                        { from: '23:00', to: '00:50' }
+                    ]
+                },
+                Mon: {
+                    working_hours: [
+                        { from: '08:00', to: '13:00' },
+                        { from: '14:00', to: '17:15' }
+                    ]
+                }
+            };
+
+            var nowsAndExpectedNextEvents = [{
+                now: { day: 'Mon', time: '00:05' },
+                expected: [
+                    { type: EVENT_CLOSE, time: '00:50', dayOffset: 0 },
+                    { type: EVENT_OPEN, time: '08:00', dayOffset: 0 }
+                ]
+            }, {
+                now: { day: 'Mon', time: '01:00' },
+                expected: [
+                    { type: EVENT_OPEN, time: '08:00', dayOffset: 0 },
+                    { type: EVENT_CLOSE, time: '13:00', dayOffset: 0 }
+                ]
+            }, {
+                now: { day: 'Mon', time: '09:00' },
+                expected: [
+                    { type: EVENT_CLOSE, time: '13:00', dayOffset: 0 },
+                    { type: EVENT_OPEN, time: '14:00', dayOffset: 0 }
+                ]
+            }, {
+                now: { day: 'Mon', time: '17:15' },
+                expected: [
+                    { type: EVENT_OPEN, time: '06:00', dayOffset: 6 },
+                    { type: EVENT_CLOSE, time: '07:00', dayOffset: 6 }
+                ]
+            }];
+
+
+            nowsAndExpectedNextEvents.forEach(function(testCase) {
+                expect(core.getNextEvents(schedule, testCase.now)).to.deep.equal(testCase.expected);
+            });
+        });
+
+        it('Works once a week', function() {
+            var schedule = {
+                Sun: {
+                    working_hours: [
+                        { from: '06:00', to: '07:00' }
+                    ]
+                }
+            };
+
+            var now = { day: 'Sun', time: '07:05'};
+
+            var expected = [
+                { type: EVENT_OPEN, time: '06:00', dayOffset: 7 },
+                { type: EVENT_CLOSE, time: '07:00', dayOffset: 7 }
+            ];
+            expect(core.getNextEvents(schedule, now)).to.deep.equal(expected);
+        });
+    });
+
+    it('getTodayBreakHours', function() {
+        var schedule = {
+            Mon: {working_hours: [{ from: '08:00', to: '20:00' }]},
+            Tue: {working_hours: [{ from: '08:00', to: '13:00' }, { from: '14:00', to: '20:00' }]},
+            Sun: {working_hours: [{ from: '13:00', to: '19:00' }]},
+        };
+
+        expect(core.getTodayBreakHours(schedule, {day: 'Mon'})).to.deep.equal([]);
+        expect(core.getTodayBreakHours(schedule, {day: 'Fri'})).to.deep.equal([]);
+        expect(core.getTodayBreakHours(schedule, {day: 'Tue'})).to.deep.equal([{ from: '13:00', to: '14:00' }]);
+    });
+
+    describe('getStatus', function() {
+        var schedule = {
+            Sun: {
+                working_hours: [
+                    { from: '06:00', to: '07:00' },
+                    { from: '23:00', to: '00:50' }
+                ]
+            },
+            Mon: {
+                working_hours: [
+                    { from: '08:00', to: '13:00' },
+                    { from: '14:00', to: '17:15' }
+                ]
+            }
+        };
+
+        var nowsAndExpectedStatuses = [{
+            now: { day: 'Mon', time: '08:00' },
+            expected: { type: STATUS_OPENED }
+        }, {
+            now: { day: 'Sun', time: '05:00' },
+            expected: { type: STATUS_WILL_OPEN_AT_TIME, time: '06:00' }
+        }, {
+            now: { day: 'Sun', time: '05:01' },
+            expected: { type: STATUS_WILL_OPEN_IN_TIME, minutesTo: 59 }
+        }, {
+            now: { day: 'Sun', time: '05:59' },
+            expected: { type: STATUS_WILL_OPEN_IN_MINUTE }
+        }, {
+            now: { day: 'Sun', time: '13:13' },
+            expected: { type: STATUS_WILL_OPEN_AT_TIME_FROM_BREAK, time: '23:00', breakType: BREAK_REST }
+        }, {
+            now: { day: 'Sun', time: '22:50' },
+            expected: { type: STATUS_WILL_OPEN_IN_TIME_FROM_BREAK, minutesTo: 10, breakType: BREAK_REST }
+        }, {
+            now: { day: 'Sun', time: '22:59' },
+            expected: { type: STATUS_WILL_OPEN_IN_MINUTE_FROM_BREAK, breakType: BREAK_REST }
+        }, {
+            now: { day: 'Mon', time: '17:16' },
+            expected: { type: STATUS_WILL_OPEN_AT_DAY_AT_TIME, day: 'Sun', time: '06:00' }
+        }, {
+            now: { day: 'Sat', time: '17:16' },
+            expected: { type: STATUS_WILL_OPEN_TOMORROW_AT_TIME, time: '06:00' }
+        }, {
+            now: { day: 'Fri', time: '17:16' },
+            expected: { type: STATUS_WILL_OPEN_DAY_AFTER_TOMORROW_AT_TIME, time: '06:00' }
+        }, {
+            now: { day: 'Mon', time: '17:14' },
+            expected: { type: STATUS_WILL_CLOSE_IN_MINUTE, breakType: null }
+        }, {
+            now: { day: 'Mon', time: '12:59' },
+            expected: { type: STATUS_WILL_CLOSE_IN_MINUTE_FOR_BREAK, breakType: BREAK_LUNCH }
+        }, {
+            now: { day: 'Mon', time: '17:00' },
+            expected: { type: STATUS_WILL_CLOSE_IN_TIME, minutesTo: 15, breakType: null }
+        }, {
+            now: { day: 'Mon', time: '12:01' },
+            expected: { type: STATUS_WILL_CLOSE_IN_TIME_FOR_BREAK, minutesTo: 59, breakType: BREAK_LUNCH }
+        }, {
+            now: { day: 'Mon', time: '12:00' },
+            expected: { type: STATUS_OPENED }
+        }];
+
+        nowsAndExpectedStatuses.forEach(function(testCase, index) {
+            var status = core.getStatus(schedule, testCase.now,  60, ['Sun', 'Sat']);
+            it(`case #${index + 1}`, function() {
+                expect(status.type).to.equal(testCase.expected.type);
+                expect(status.time).to.equal(testCase.expected.time);
+                expect(status.breakType).to.equal(testCase.expected.breakType, status.type);
+            });
+        });
+
+        it('Empty schedule', function() {
+            expect(core.getStatus([], { day: 'Mon', time: '13:37' }, 60, ['Sun', 'Sat'])).to.be.an('null');
+        });
+
+        it('24x7', function() {
+            var goodDay = {working_hours: [ {from: '00:00', to: '24:00'}]};
+            var schedule = {
+                Sun: goodDay,
+                Mon: goodDay,
+                Tue: goodDay,
+                Wed: goodDay,
+                Thu: goodDay,
+                Fri: goodDay,
+                Sat: goodDay
+            };
+            expect(core.getStatus(schedule, { day: 'Mon', time: '13:37' }, 60, ['Sun', 'Sat']))
+                .to.deep.equal({ type: STATUS_OPENED });
+        });
+    });
 });
