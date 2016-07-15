@@ -148,19 +148,33 @@ State of the schedule with forecast like this:
 ```
 
 ##### Status list (constants in `/src/constants`):
-* `OPENED` - firm opened, will not close in near time.
-* `WILL_CLOSE_IN_MINUTE_FOR_BREAK` - will close in 1 minute for break `breakType`.
-* `WILL_CLOSE_IN_TIME_FOR_BREAK` - will close in next `minutesTo` for break `breakType`.
-* `WILL_CLOSE_IN_TIME` - will close in next `minutesTo`
+###### Opened
+`OPENED` - firm opened, will not close in near time.
 
-* `WILL_OPEN_AT_TIME` - will open today at `time`
-* `WILL_OPEN_TOMORROW_AT_TIME` - will open tomorrow at `time`
-* `WILL_OPEN_DAY_AFTER_TOMORROW_AT_TIME` - will open the day after tomorrow at `time`
-* `WILL_OPEN_AT_DAY_AT_TIME` - will open on `day` at `time`
+`WILL_CLOSE_IN_MINUTE_FOR_BREAK` - will close in 1 minute for break `breakType`.
 
-* `WILL_OPEN_IN_MINUTE` - will open in 1 minute
-* `WILL_OPEN_IN_TIME` - will open in next `minutesTo`
+`WILL_CLOSE_IN_TIME_FOR_BREAK` - will close in next `minutesTo` for break `breakType`.
 
-* `WILL_OPEN_IN_MINUTE_FROM_BREAK` - will open in 1 minute from brake `breakType`
-* `WILL_OPEN_IN_TIME_FROM_BREAK` - will open in `minutesTo` from brake `breakType`
-* `WILL_OPEN_AT_TIME_FROM_BREAK` - will open at `time` from brake `breakType`
+`WILL_CLOSE_IN_TIME` - will close in next `minutesTo`
+
+###### Closed
+
+`WILL_OPEN_AT_TIME` - will open today at `time`
+
+`WILL_OPEN_TOMORROW_AT_TIME` - will open tomorrow at `time`
+
+`WILL_OPEN_DAY_AFTER_TOMORROW_AT_TIME` - will open the day after tomorrow at `time`
+
+`WILL_OPEN_AT_DAY_AT_TIME` - will open on `day` at `time`
+
+`WILL_OPEN_IN_MINUTE` - will open in 1 minute
+
+`WILL_OPEN_IN_TIME` - will open in next `minutesTo`
+
+###### Closed for break
+
+`WILL_OPEN_IN_MINUTE_FROM_BREAK` - will open in 1 minute from brake `breakType`
+
+`WILL_OPEN_IN_TIME_FROM_BREAK` - will open in `minutesTo` from brake `breakType`
+
+`WILL_OPEN_AT_TIME_FROM_BREAK` - will open at `time` from brake `breakType`
