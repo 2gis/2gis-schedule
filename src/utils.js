@@ -3,8 +3,14 @@ var CONSTANTS = require('./constants');
 var DAY_KEYS = CONSTANTS.DAY_KEYS;
 var MIDNIGHT = '00:00';
 
-const BREAK_LUNCH = CONSTANTS.BREAK_LUNCH;
-const BREAK_REST = CONSTANTS.BREAK_REST;
+var MINUTES_IN_HOUR = 60;
+var MINUTES_IN_DAY = 60 * 24;
+
+var BREAK_LUNCH = CONSTANTS.BREAK_LUNCH;
+var BREAK_REST = CONSTANTS.BREAK_REST;
+
+var EVENT_OPEN = CONSTANTS.EVENT_OPEN;
+var EVENT_CLOSE = CONSTANTS.EVENT_CLOSE;
 
 /**
  * Returns key for next day with offset from current day
@@ -125,3 +131,78 @@ function getBreakType(interval) {
     return interval.from >= '12:00' && to <= '16:00' ? BREAK_LUNCH : BREAK_REST;
 }
 exports.getBreakType = getBreakType;
+
+/**
+ * Returns break time between events
+ * @param  {Object} event1 - first event
+ * @param  {Object} event2 - next event
+ * @return {String}
+ */
+function getBreakTypeBetweenEvents(event1, event2) {
+    // If days different it isn't common break
+    if (event1.dayOffset != event2.dayOffset) {
+        return null;
+    }
+
+    return getBreakType({
+        from: event1.time,
+        to: event2.time
+    });
+}
+exports.getBreakTypeBetweenEvents = getBreakTypeBetweenEvents;
+
+
+/**
+ * Returns array of interval events — openings and closings
+ * @param  {Object} [interval]
+ * @return {[{type: String, time: String, dayOffset: String}]}
+ */
+function splitIntervalToEvents(interval) {
+    if (!interval) {
+        return [];
+    }
+
+    var over = interval.to < interval.from; // interval cross midnight
+
+    return [
+        {
+            type: EVENT_OPEN,
+            time: interval.from,
+            dayOffset: (interval.dayOffset || 0)
+        },
+        {
+            type: EVENT_CLOSE,
+            time: interval.to,
+            dayOffset: (interval.dayOffset || 0) + Number(over)
+        }
+    ];
+}
+exports.splitIntervalToEvents = splitIntervalToEvents;
+
+/**
+ * Gap between two timestamps with dayOffset in minutes
+ * @param  {String} fromTime
+ * @param  {String} toTime
+ * @param  {Number} dayOffset
+ * @return {Number}
+ */
+function timeTo(fromTime, toTime, dayOffset) {
+    var from = parseTime(fromTime);
+    var to = parseTime(toTime);
+    return (to.m - from.m) + (to.h - from.h) * MINUTES_IN_HOUR + dayOffset * MINUTES_IN_DAY;
+}
+exports.timeTo = timeTo;
+
+/**
+ * 01:23 --> { h: 1, m: 23 }
+ * @param  {String} time
+ * @return {Object}
+ */
+function parseTime(time) {
+    var parts = time.split(':');
+    return {
+        h: +parts[0],
+        m: +parts[1]
+    };
+}
+exports.parseTime = parseTime;
