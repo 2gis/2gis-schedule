@@ -326,7 +326,7 @@ describe('core', function() {
 
         nowsAndExpectedStatuses.forEach(function(testCase, index) {
             var status = core.getStatus(schedule, testCase.now,  60, ['Sun', 'Sat']);
-            it(`case #${index + 1}`, function() {
+            it('case #' + (index + 1), function() {
                 expect(status.type).to.equal(testCase.expected.type);
                 expect(status.time).to.equal(testCase.expected.time);
                 expect(status.breakType).to.equal(testCase.expected.breakType, status.type);
