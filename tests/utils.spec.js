@@ -164,4 +164,14 @@ describe('utils', function () {
         expect(utils.timeTo('12:48', '18:27', 0)).to.equal(339);
         expect(utils.timeTo('12:00', '13:00', 1)).to.equal(1500);
     });
+
+    it('getWorkingHours', function() {
+        var workingHours = [{ from: '06:00', to: '07:00' }];
+        expect(utils.getWorkingHours({working_hours: workingHours})).to.deep.equal(workingHours);
+        expect(utils.getWorkingHours({working_hours: workingHours}, [])).to.deep.equal(workingHours);
+        expect(utils.getWorkingHours({working_hours: []})).to.deep.equal([]);
+        expect(utils.getWorkingHours({})).to.be.an('undefined');
+        expect(utils.getWorkingHours()).to.be.an('undefined');
+        expect(utils.getWorkingHours({}, [])).to.deep.equal([]);
+    });
 });

@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var CONSTANTS = require('./constants');
 var DAY_KEYS = CONSTANTS.DAY_KEYS;
 var MIDNIGHT = '00:00';
@@ -31,8 +30,13 @@ exports.getDayFromToday = getDayFromToday;
  * @return {Object}
  */
 function getOverlappingWorkingHours(working_hours) {
-    var interval = _.findLast(working_hours, function(interval) {
-        return interval.from > interval.to;
+    var interval;
+
+    // findLast
+    (working_hours || []).forEach(function(currentInterval) {
+        if (currentInterval.from > currentInterval.to) {
+            interval = currentInterval;
+        }
     });
 
     if (interval) {
@@ -76,9 +80,19 @@ function add24h(time) {
  * @return {Object}
  */
 function findInterval(intervals, time) {
-    return _.find(intervals, function(interval) {
-        return isTimeInInterval(time, interval)
+    var interval;
+
+    intervals.forEach(function(currentInterval) {
+        if (interval) {
+            return;
+        }
+
+        if(isTimeInInterval(time, currentInterval)) {
+            interval = currentInterval;
+        }
     });
+
+    return interval;
 }
 exports.findInterval = findInterval;
 
@@ -88,9 +102,16 @@ exports.findInterval = findInterval;
  * @return {Boolean}
  */
 function isEveryDay(schedule) {
-    return !_.some(DAY_KEYS.slice(1), function(key) {
-        return !_.isEqual(schedule[key], schedule[DAY_KEYS[0]]);
+    var worksEveryDay = true;
+    var day0 = JSON.stringify(schedule[DAY_KEYS[0]]);
+
+    DAY_KEYS.slice(1).forEach(function(day){
+        if (JSON.stringify(schedule[day]) != day0) {
+            worksEveryDay = false;
+        }
     });
+
+    return worksEveryDay;
 }
 exports.isEveryDay = isEveryDay;
 
@@ -102,8 +123,8 @@ exports.isEveryDay = isEveryDay;
  * @return {Array}
  */
 function getBreakHours(working_hours) {
-    return _.reduce(working_hours, function(breaks, interval) {
-        const last = _.last(breaks);
+    return (working_hours || []).reduce(function(breaks, interval) {
+        var last = breaks[breaks.length - 1];
         // beginning (from) of each new work time interval is the end of break,
         // we add to the last break this beginning (to)
         if (last) {
@@ -206,3 +227,14 @@ function parseTime(time) {
     };
 }
 exports.parseTime = parseTime;
+
+/**
+ * Returns working_hours array from schedule for one day
+ * @param scheduleForDay - schedule object for one day like this: { working_hours: [{ from: '06:00', to: '07:00' }] }
+ * @param defaultValue - what return if schedule id empty
+ * @returns {Array|defaultValue}
+ */
+function getWorkingHours(scheduleForDay, defaultValue) {
+    return scheduleForDay && scheduleForDay.working_hours || defaultValue;
+}
+exports.getWorkingHours = getWorkingHours;

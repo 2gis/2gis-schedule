@@ -1,5 +1,3 @@
-var _ = require('lodash');
-
 var utils = require('./utils');
 var CONSTANTS = require('./constants');
 var DAY_KEYS = CONSTANTS.DAY_KEYS;
@@ -39,7 +37,7 @@ function getDayWithOverlap(schedule, key) {
     var prev = utils.getDayFromToday(key, 6);
     var overlap = schedule[prev] && utils.getOverlappingWorkingHours(schedule[prev].working_hours);
 
-    var working_hours = _.get(schedule[key], 'working_hours', []);
+    var working_hours = utils.getWorkingHours(schedule[key], []);
 
     return {
         working_hours: overlap ? [overlap].concat(working_hours) : working_hours
@@ -69,10 +67,20 @@ exports.isOpened = function(schedule, now) {
  * @return {Boolean}
  */
 function is24x7(schedule) {
-    return !_.find(DAY_KEYS, function(key) {
-            var interval = _.get(schedule[key], ['working_hours', 0]);
-            return !(interval && interval.from == '00:00' && interval.to == '24:00');
-        });
+    var works24x7 = true;
+    DAY_KEYS.forEach(function(day) {
+        var oneDaySchedule = schedule[day];
+        if (!oneDaySchedule || !oneDaySchedule.working_hours || oneDaySchedule.working_hours.length != 1) {
+            works24x7 = false;
+            return;
+        }
+
+        var interval = oneDaySchedule.working_hours[0];
+        if (!(interval && interval.from == '00:00' && interval.to == '24:00')) {
+            works24x7 = false;
+        }
+    });
+    return works24x7;
 }
 exports.is24x7 = is24x7;
 
@@ -114,7 +122,7 @@ exports.getTodayWorktime = getTodayWorktime;
  * @return {Array}
  */
 function getTodayBreakHours(schedule, now) {
-    return utils.getBreakHours(_.get(schedule[now.day], 'working_hours'));
+    return utils.getBreakHours(utils.getWorkingHours(schedule[now.day]));
 }
 exports.getTodayBreakHours = getTodayBreakHours;
 
@@ -133,35 +141,40 @@ function getNextEvents(schedule, now) {
 
     // We need take events from yesterday that happens today
     var yesterdayKey = utils.getDayFromToday(now.day, 6);
-    var yesterdayWorkingHours = _.get(schedule[yesterdayKey], 'working_hours');
+    var yesterdayWorkingHours = utils.getWorkingHours(schedule[yesterdayKey]);
     var yesterdayEvents = utils.splitIntervalToEvents(
         utils.getOverlappingWorkingHours(yesterdayWorkingHours)
     );
 
-    return _.chain(keysFromToday)
+    return keysFromToday
         // Sorting schedule
         .map(function(key) {
             return schedule[key];
         })
         // Adding offset from today to have this information after flatten
         .map(function(day, index) {
-            return _.map(_.get(day, 'working_hours'),
-            function(interval) {
-                return _.assign({}, interval, { dayOffset: index });
-            })
+            return utils.getWorkingHours(day, []).map(function(interval) {
+                return {
+                    from: interval.from,
+                    to: interval.to,
+                    dayOffset: index
+                };
+            });
         })
-        .flatten()
+        // flatten
+        .reduce(function(flatIntervals, intervalsForDay) {
+            return flatIntervals.concat(intervalsForDay);
+        })
         // Transform each interval in two events: closing and opening
         .reduce(function(events, interval) {
             return events.concat(utils.splitIntervalToEvents(interval))
-        }, _.tail(yesterdayEvents))
+        }, yesterdayEvents.slice(1))
         // Left only events, that will happen after now
         .filter(function(event) {
             return event.dayOffset > 0 || event.time > now.time;
         })
-        // Take only 2 (lazy lodash will no filter all)
-        .take(2)
-        .value();
+        // Take only 2
+        .slice(0, 2);
 }
 exports.getNextEvents = getNextEvents;
 
@@ -220,7 +233,7 @@ function getStatus(schedule, now, forecastThreshold, weekends) {
 
     // next.type == EVENT_OPEN
     var days = next.dayOffset; // days before opening
-    var isWeekendToday = _.includes(weekends, now.day); // if it is day off today
+    var isWeekendToday = weekends.indexOf(now.day) != -1; // if it is day off today
 
     // will open today (first open or from break)
     if (days == 0) {
