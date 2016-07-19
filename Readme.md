@@ -111,7 +111,7 @@ There is constant `DAY_KEYS` exported by library to convert javascript `Date.get
 
 Today organisation works from 14:00 to 17:00, in the same days worktime the same
 
-## getBreakHours(schedule, now)
+## getTodayBreakHours(schedule, now)
 
 Returns array of breaks between work time intervals
 If work time is: `[{ from: '08:00', to: '13:00' }, { from: '14:00', to: '17:45' }, { from: '18:00', to: '20:00' }]`
