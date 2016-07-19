@@ -10,8 +10,6 @@ var WORK_NOT_WORKING = CONSTANTS.WORK_NOT_WORKING;
 var EVENT_CLOSE = CONSTANTS.EVENT_CLOSE;
 
 var STATUS_OPENED = CONSTANTS.STATUS_OPENED;
-var STATUS_WILL_CLOSE_IN_MINUTE_FOR_BREAK = CONSTANTS.STATUS_WILL_CLOSE_IN_MINUTE_FOR_BREAK;
-var STATUS_WILL_CLOSE_IN_MINUTE = CONSTANTS.STATUS_WILL_CLOSE_IN_MINUTE;
 var STATUS_WILL_CLOSE_IN_TIME_FOR_BREAK = CONSTANTS.STATUS_WILL_CLOSE_IN_TIME_FOR_BREAK;
 var STATUS_WILL_CLOSE_IN_TIME = CONSTANTS.STATUS_WILL_CLOSE_IN_TIME;
 
@@ -20,10 +18,8 @@ var STATUS_WILL_OPEN_AT_DAY_AT_TIME = CONSTANTS.STATUS_WILL_OPEN_AT_DAY_AT_TIME;
 var STATUS_WILL_OPEN_TOMORROW_AT_TIME = CONSTANTS.STATUS_WILL_OPEN_TOMORROW_AT_TIME;
 var STATUS_WILL_OPEN_DAY_AFTER_TOMORROW_AT_TIME = CONSTANTS.STATUS_WILL_OPEN_DAY_AFTER_TOMORROW_AT_TIME;
 
-var STATUS_WILL_OPEN_IN_MINUTE = CONSTANTS.STATUS_WILL_OPEN_IN_MINUTE;
 var STATUS_WILL_OPEN_IN_TIME = CONSTANTS.STATUS_WILL_OPEN_IN_TIME;
 
-var STATUS_WILL_OPEN_IN_MINUTE_FROM_BREAK = CONSTANTS.STATUS_WILL_OPEN_IN_MINUTE_FROM_BREAK;
 var STATUS_WILL_OPEN_IN_TIME_FROM_BREAK = CONSTANTS.STATUS_WILL_OPEN_IN_TIME_FROM_BREAK;
 var STATUS_WILL_OPEN_AT_TIME_FROM_BREAK = CONSTANTS.STATUS_WILL_OPEN_AT_TIME_FROM_BREAK;
 
@@ -217,13 +213,6 @@ function getStatus(schedule, now, forecastThreshold, weekends) {
         // If break/lunch near say what type of break it will be
         breakType = utils.getBreakTypeBetweenEvents(next, overnext);
 
-        if (minutesTo <= 1) {
-            return {
-                type: breakType ? STATUS_WILL_CLOSE_IN_MINUTE_FOR_BREAK : STATUS_WILL_CLOSE_IN_MINUTE,
-                breakType: breakType
-            };
-        }
-
         return {
             type: breakType ? STATUS_WILL_CLOSE_IN_TIME_FOR_BREAK : STATUS_WILL_CLOSE_IN_TIME,
             breakType: breakType,
@@ -248,13 +237,6 @@ function getStatus(schedule, now, forecastThreshold, weekends) {
                 type: breakType ? STATUS_WILL_OPEN_AT_TIME_FROM_BREAK : STATUS_WILL_OPEN_AT_TIME,
                 breakType: breakType,
                 time: next.time
-            };
-        }
-
-        if (minutesTo <= 1) {
-            return {
-                type: breakType ? STATUS_WILL_OPEN_IN_MINUTE_FROM_BREAK : STATUS_WILL_OPEN_IN_MINUTE,
-                breakType: breakType
             };
         }
 

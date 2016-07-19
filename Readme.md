@@ -64,6 +64,8 @@ Way to represent time in which we understand, is this organisation works, or not
 
 In this way we say that we want to know, if organisation works on Monday at 12:30
 
+There is constant `DAY_KEYS` exported by library to convert javascript `Date.getDay()` to correct day.
+
 # Methods
 
 ## isOpened(schedule, today)
@@ -151,8 +153,6 @@ State of the schedule with forecast like this:
 ###### Opened
 `OPENED` - firm opened, will not close in near time.
 
-`WILL_CLOSE_IN_MINUTE_FOR_BREAK` - will close in 1 minute for break `breakType`.
-
 `WILL_CLOSE_IN_TIME_FOR_BREAK` - will close in next `minutesTo` for break `breakType`.
 
 `WILL_CLOSE_IN_TIME` - will close in next `minutesTo`
@@ -167,13 +167,9 @@ State of the schedule with forecast like this:
 
 `WILL_OPEN_AT_DAY_AT_TIME` - will open on `day` at `time`
 
-`WILL_OPEN_IN_MINUTE` - will open in 1 minute
-
 `WILL_OPEN_IN_TIME` - will open in next `minutesTo`
 
 ###### Closed for break
-
-`WILL_OPEN_IN_MINUTE_FROM_BREAK` - will open in 1 minute from brake `breakType`
 
 `WILL_OPEN_IN_TIME_FROM_BREAK` - will open in `minutesTo` from brake `breakType`
 

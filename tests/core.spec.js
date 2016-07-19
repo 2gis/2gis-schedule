@@ -16,8 +16,6 @@ var BREAK_LUNCH = CONSTANTS.BREAK_LUNCH;
 var BREAK_REST = CONSTANTS.BREAK_REST;
 
 var STATUS_OPENED = CONSTANTS.STATUS_OPENED;
-var STATUS_WILL_CLOSE_IN_MINUTE_FOR_BREAK = CONSTANTS.STATUS_WILL_CLOSE_IN_MINUTE_FOR_BREAK;
-var STATUS_WILL_CLOSE_IN_MINUTE = CONSTANTS.STATUS_WILL_CLOSE_IN_MINUTE;
 var STATUS_WILL_CLOSE_IN_TIME_FOR_BREAK = CONSTANTS.STATUS_WILL_CLOSE_IN_TIME_FOR_BREAK;
 var STATUS_WILL_CLOSE_IN_TIME = CONSTANTS.STATUS_WILL_CLOSE_IN_TIME;
 
@@ -26,10 +24,8 @@ var STATUS_WILL_OPEN_AT_DAY_AT_TIME = CONSTANTS.STATUS_WILL_OPEN_AT_DAY_AT_TIME;
 var STATUS_WILL_OPEN_TOMORROW_AT_TIME = CONSTANTS.STATUS_WILL_OPEN_TOMORROW_AT_TIME;
 var STATUS_WILL_OPEN_DAY_AFTER_TOMORROW_AT_TIME = CONSTANTS.STATUS_WILL_OPEN_DAY_AFTER_TOMORROW_AT_TIME;
 
-var STATUS_WILL_OPEN_IN_MINUTE = CONSTANTS.STATUS_WILL_OPEN_IN_MINUTE;
 var STATUS_WILL_OPEN_IN_TIME = CONSTANTS.STATUS_WILL_OPEN_IN_TIME;
 
-var STATUS_WILL_OPEN_IN_MINUTE_FROM_BREAK = CONSTANTS.STATUS_WILL_OPEN_IN_MINUTE_FROM_BREAK;
 var STATUS_WILL_OPEN_IN_TIME_FROM_BREAK = CONSTANTS.STATUS_WILL_OPEN_IN_TIME_FROM_BREAK;
 var STATUS_WILL_OPEN_AT_TIME_FROM_BREAK = CONSTANTS.STATUS_WILL_OPEN_AT_TIME_FROM_BREAK;
 
@@ -288,7 +284,7 @@ describe('core', function() {
             expected: { type: STATUS_WILL_OPEN_IN_TIME, minutesTo: 59 }
         }, {
             now: { day: 'Sun', time: '05:59' },
-            expected: { type: STATUS_WILL_OPEN_IN_MINUTE }
+            expected: { type: STATUS_WILL_OPEN_IN_TIME, minutesTo: 1 }
         }, {
             now: { day: 'Sun', time: '13:13' },
             expected: { type: STATUS_WILL_OPEN_AT_TIME_FROM_BREAK, time: '23:00', breakType: BREAK_REST }
@@ -297,7 +293,7 @@ describe('core', function() {
             expected: { type: STATUS_WILL_OPEN_IN_TIME_FROM_BREAK, minutesTo: 10, breakType: BREAK_REST }
         }, {
             now: { day: 'Sun', time: '22:59' },
-            expected: { type: STATUS_WILL_OPEN_IN_MINUTE_FROM_BREAK, breakType: BREAK_REST }
+            expected: { type: STATUS_WILL_OPEN_IN_TIME_FROM_BREAK, minutesTo: 1, breakType: BREAK_REST }
         }, {
             now: { day: 'Mon', time: '17:16' },
             expected: { type: STATUS_WILL_OPEN_AT_DAY_AT_TIME, day: 'Sun', time: '06:00' }
@@ -309,10 +305,10 @@ describe('core', function() {
             expected: { type: STATUS_WILL_OPEN_DAY_AFTER_TOMORROW_AT_TIME, time: '06:00' }
         }, {
             now: { day: 'Mon', time: '17:14' },
-            expected: { type: STATUS_WILL_CLOSE_IN_MINUTE, breakType: null }
+            expected: { type: STATUS_WILL_CLOSE_IN_TIME, minutesTo: 1, breakType: null }
         }, {
             now: { day: 'Mon', time: '12:59' },
-            expected: { type: STATUS_WILL_CLOSE_IN_MINUTE_FOR_BREAK, breakType: BREAK_LUNCH }
+            expected: { type: STATUS_WILL_CLOSE_IN_TIME_FOR_BREAK, minutesTo: 1, breakType: BREAK_LUNCH }
         }, {
             now: { day: 'Mon', time: '17:00' },
             expected: { type: STATUS_WILL_CLOSE_IN_TIME, minutesTo: 15, breakType: null }
