@@ -11,6 +11,7 @@
   ],
   "author": "2gis",
   "license": "ISC",
+  "typings": "./index.d.ts",
   "devDependencies": {
     "chai": "^3.5.0",
     "coveralls": "^2.11.9",
